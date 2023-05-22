@@ -3,22 +3,13 @@ package com.digimaster.lib.security.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import javax.crypto.SecretKey;
 
-@Component
 public class JwtUtil {
-
-    @Value("${jwt.secret}")
-    private String jwtSecret;
-    @Value("${jwt.secret.refresh}")
-    private String jwtSecretRefresh;
 
     public Claims getClaims(final String token) {
         try {
-            SecretKey secret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+            SecretKey secret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SecretUtils.JWT_SECRET));
             Claims body = Jwts.parserBuilder().setSigningKey(secret).build().parseClaimsJws(token).getBody();
 //            Claims body = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
             return body;
@@ -30,7 +21,7 @@ public class JwtUtil {
 
     public void validateToken(final String token) throws JwtTokenMalformedException, JwtTokenMissingException {
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+            Jwts.parser().setSigningKey(SecretUtils.JWT_SECRET).parseClaimsJws(token);
         } catch (SignatureException ex) {
             throw new JwtTokenMalformedException("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
@@ -46,7 +37,7 @@ public class JwtUtil {
 
     public void validateRefreshToken(final String refreshToken) throws JwtTokenMalformedException, JwtTokenMissingException {
         try {
-            Jwts.parser().setSigningKey(jwtSecretRefresh).parseClaimsJws(refreshToken);
+            Jwts.parser().setSigningKey(SecretUtils.JWT_SECRET_REFRESH).parseClaimsJws(refreshToken);
         } catch (SignatureException ex) {
             throw new JwtTokenMalformedException("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
